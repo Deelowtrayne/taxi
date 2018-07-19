@@ -1,33 +1,53 @@
 "use strict";
 const express = require('express');
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-//const timeAgo = require('node-time-ago');
-
-
-
-// import handlebars and body-parser
 const exphbs = require('express-handlebars');
 const bodyParser = require('body-parser');
 
-app.use(express.static('public'));
+//const timeAgo = require('node-time-ago');
 
-// handlebars
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+let Factory = require('./taxi_app');
+const appFunc = Factory();
+
+async function getResults(next) {
+  try {
+    let result = await appFunc.search('-33.971505, 18.563417');
+    result.forEach((row) => {
+      console.log(row.display_name);
+    })  
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+getResults();
+
+
+// geocoder.search( { q: '-33.9282, 18.4236' } )
+//     .then((response) => {
+//         response.forEach(result => {
+//             console.log(result.display_name)
+//         });
+//     })
+//     .catch((error) => {
+//         console.log(error)
+//     })
+
+
+//middleware
 app.engine('handlebars', exphbs({ 
   defaultLayout: 'main', 
   helpers : {}
 }));
-
 app.set('view engine', 'handlebars');
-
-//middleware
+app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Routes
-app.get('/', (req, res) => {
-    res.render('home');
-})
+app.get('/', (req, res) => res.render('home'));
 
-app.listen(PORT, () => console.log("listening on port ", PORT));
+// Start server on PORT
+app.listen(PORT, () => console.log(`listening on port ${PORT}...`));
